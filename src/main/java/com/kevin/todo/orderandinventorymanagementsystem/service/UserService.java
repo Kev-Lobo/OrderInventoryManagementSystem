@@ -5,6 +5,7 @@ import com.kevin.todo.orderandinventorymanagementsystem.dto.response.UserRespons
 import com.kevin.todo.orderandinventorymanagementsystem.entity.UserEntity;
 import com.kevin.todo.orderandinventorymanagementsystem.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -15,17 +16,29 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    public UserResponse saveNewUser(UserRequest userRequest) {
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    public UserResponse registerUser(UserRequest userRequest) {
         UserEntity userEntity = new UserEntity();
         userEntity.setUserName(userRequest.getUserName());
-        userEntity.setPassword(userRequest.getPassword());
+        userEntity.setPassword(passwordEncoder.encode(userRequest.getPassword()));
         userEntity.setEmail(userRequest.getEmail());
         userEntity.setRoles(Arrays.asList("USER"));
         UserEntity save = userRepository.save(userEntity);
         return toResponse(save);
     }
+    public UserResponse registerAdmin(UserRequest userRequest) {
+        UserEntity userEntity = new UserEntity();
+        userEntity.setUserName(userRequest.getUserName());
+        userEntity.setPassword(passwordEncoder.encode(userRequest.getPassword()));
+        userEntity.setEmail(userRequest.getEmail());
+        userEntity.setRoles(Arrays.asList("USER", "ADMIN"));
+        UserEntity save = userRepository.save(userEntity);
+        return toResponse(save);
+    }
 
-    public void saveUser(UserEntity userEntity) {
+    public void updateUser(UserEntity userEntity) {
         userRepository.save(userEntity);
     }
 

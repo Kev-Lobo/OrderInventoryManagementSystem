@@ -53,7 +53,7 @@ public class OrderService {
             userEntity.setOrders(new ArrayList<>());
         }
         userEntity.getOrders().add(savedOrder.getOrderId());
-        userService.saveUser(userEntity);
+        userService.updateUser(userEntity);
 
         return toResponse(savedOrder);
     }
@@ -67,6 +67,21 @@ public class OrderService {
         Orders order = ordersRepository.findById(new ObjectId(orderId))
                 .orElseThrow(() -> new RuntimeException("Order not found: " + orderId));
         return toResponse(order);
+    }
+
+    public List<OrderResponse> getAllOrders() {
+        return ordersRepository.findAll().stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    public OrderResponse updateOrderStatus(String orderId, OrderStatus newStatus) {
+        Orders order = ordersRepository.findById(new ObjectId(orderId))
+                .orElseThrow(() -> new RuntimeException("Order not found: " + orderId));
+        order.setStatus(newStatus);
+        order.setUpdatedAt(LocalDateTime.now());
+        Orders updated = ordersRepository.save(order);
+        return toResponse(updated);
     }
 
     public OrderResponse toResponse(Orders order) {

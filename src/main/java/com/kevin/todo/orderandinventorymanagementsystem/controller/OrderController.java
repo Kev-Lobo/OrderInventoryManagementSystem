@@ -39,7 +39,7 @@ public class OrderController {
         return ResponseEntity.ok(orders);
     }
 
-    @GetMapping("/process-orders/{userName}")
+    @PutMapping("/process-orders/{userName}")
     public ResponseEntity<List<Orders>> processOrdersByUsername(@PathVariable String userName) {
         List<Orders> orders = orderService.getOrdersByUsername(userName);
         return ResponseEntity.ok(orders);
