@@ -8,4 +8,5 @@ import java.util.Optional;
 
 public interface InventoryRepository extends MongoRepository<InventoryEntity, ObjectId> {
     Optional<InventoryEntity> findByProdId(ObjectId productId);
+    void deleteByProdId(ObjectId productId);
 }

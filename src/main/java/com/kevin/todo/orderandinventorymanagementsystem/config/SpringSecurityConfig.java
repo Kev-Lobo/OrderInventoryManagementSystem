@@ -8,6 +8,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -17,26 +18,26 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SpringSecurityConfig{
-
-    @Autowired
-    private UserDetailsServiceImpl userDetailsService;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-        return http
-                .csrf(crsf -> crsf.disable())
-                .authorizeHttpRequests(request -> request
-                        .requestMatchers(HttpMethod.GET, "/products/**","/public/**").permitAll()
-                        .requestMatchers("/products/**").hasRole("ADMIN")   // POST/PUT/DELETE
+        return http.authorizeHttpRequests(request -> request
+                        .requestMatchers("/public/**","/users/signup").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/products/**").permitAll()
+                        .requestMatchers("/products/**").hasRole("ADMIN")
                         .requestMatchers("/inventory/**").hasRole("ADMIN")
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/orders/**").authenticated()
+                        .requestMatchers("/users/login").authenticated()
                         .anyRequest().authenticated())
                 .httpBasic(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .build();
     }
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

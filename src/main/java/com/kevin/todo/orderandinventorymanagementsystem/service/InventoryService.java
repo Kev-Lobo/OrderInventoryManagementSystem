@@ -29,7 +29,7 @@ public class InventoryService {
         return toResponse(inventoryEntity);
     }
 
-    public void decreaseStock(String productId, int quantity) {
+    public void reserveStock(String productId, int quantity) {
         InventoryEntity inventory = inventoryRepository.findByProdId(new ObjectId(productId))
                 .orElseThrow(() -> new RuntimeException("No inventory found for product: " + productId));
 
@@ -37,7 +37,21 @@ public class InventoryService {
             throw new RuntimeException("Insufficient stock for product: " + productId);
         }
         inventory.setAvailableQuantity(inventory.getAvailableQuantity() - quantity);
+        inventory.setReservedQuantity(inventory.getReservedQuantity() + quantity);
         inventoryRepository.save(inventory);
+    }
+
+    public void releaseReservedStock(String productId, int quantity) {
+        InventoryEntity inventory = inventoryRepository.findByProdId(new ObjectId(productId))
+                .orElseThrow(() -> new RuntimeException("No inventory found for product: " + productId));
+        int releaseReserved = Math.max(0, inventory.getReservedQuantity() - quantity);
+        inventory.setReservedQuantity(releaseReserved);
+        inventory.setAvailableQuantity(inventory.getAvailableQuantity() + quantity);
+        inventoryRepository.save(inventory);
+    }
+
+    public void deleteByProdId(ObjectId productId) {
+        inventoryRepository.deleteByProdId(productId);
     }
 
     public void initializeStock(ObjectId prodId) {

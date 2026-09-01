@@ -47,6 +47,12 @@ public class ProductService {
                 .orElseThrow(() -> new RuntimeException("Product not found: " + prodId));
         return toResponse(product);
     }
+    public void deleteProduct(ObjectId productId) {
+        productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found: " + productId));
+        productRepository.deleteById(productId);
+        inventoryService.deleteByProdId(productId);
+    }
 
     private ProductResponse toResponse(ProductEntity product) {
         return ProductResponse.builder()

@@ -30,9 +30,14 @@ public class OrderService {
 
     public OrderResponse placeOrder(OrderRequest orderRequest) {
         UserEntity userEntity = userService.findByUserName(orderRequest.getUserName());
+        if(userEntity == null){
+            throw new IllegalArgumentException("Username not found " + orderRequest.getUserName());
+        }
         ProductEntity productEntity = productService.findByProdName(orderRequest.getProdName());
-
-        inventoryService.decreaseStock(String.valueOf(productEntity.getProdId()), orderRequest.getQuantity());
+        if(productEntity == null){
+            throw new IllegalArgumentException("Product name not found " + orderRequest.getProdName());
+        }
+        inventoryService.reserveStock(String.valueOf(productEntity.getProdId()), orderRequest.getQuantity());
 
         OrderItem orderItem = new OrderItem();
         orderItem.setProdId(productEntity.getProdId());
@@ -81,6 +86,24 @@ public class OrderService {
         order.setStatus(newStatus);
         order.setUpdatedAt(LocalDateTime.now());
         Orders updated = ordersRepository.save(order);
+        return toResponse(updated);
+    }
+
+    public OrderResponse cancelOrder(String orderId) {
+        Orders orders = ordersRepository.findById(new ObjectId(orderId))
+                .orElseThrow(() -> new RuntimeException("Order not found: " + orderId));
+        if(orders.getStatus() == OrderStatus.CANCELLED){
+            throw new IllegalStateException("Order has been already cancelled " + orderId);
+        }
+        if(orders.getStatus()==OrderStatus.DELIVERED || orders.getStatus()==OrderStatus.SHIPPED){
+            throw new IllegalStateException("Cannot cancel an order that has already been " +orders.getStatus().name().toLowerCase() + " : " + orderId);
+        }
+        for(OrderItem orderItem : orders.getItems()) {
+            inventoryService.releaseReservedStock(String.valueOf(orderItem.getProdId()), orderItem.getQuantity());
+        }
+        orders.setStatus(OrderStatus.CANCELLED);
+        orders.setUpdatedAt(LocalDateTime.now());
+        Orders updated = ordersRepository.save(orders);
         return toResponse(updated);
     }
 
