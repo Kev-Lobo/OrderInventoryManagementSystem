@@ -3,7 +3,6 @@ package com.kevin.todo.orderandinventorymanagementsystem.controller;
 import com.kevin.todo.orderandinventorymanagementsystem.dto.request.ProductRequest;
 import com.kevin.todo.orderandinventorymanagementsystem.dto.response.ProductResponse;
 import com.kevin.todo.orderandinventorymanagementsystem.service.ProductService;
-import com.kevin.todo.orderandinventorymanagementsystem.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
 @Slf4j
 @RestController
 @RequestMapping("/products")
